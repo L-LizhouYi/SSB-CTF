@@ -6,11 +6,11 @@
 @ Time:  2021-05-08
 @ FileName: main.py
 """
-import os
-from flask import Flask
 from dotenv import load_dotenv
+
 import server
 
+# 加载环境变量
 load_dotenv()
 
 app = server.create_app()

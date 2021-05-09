@@ -8,7 +8,8 @@
 """
 from flask_restx import Namespace, Resource
 
-ping_namespace = Namespace("ping", description="ping server status check!")
+ping_namespace = Namespace("ping", description="服务器心跳检测")
+
 
 @ping_namespace.route("")
 class Ping(Resource):

@@ -1,2 +1,4 @@
 flask==1.1.2
 flask-restx==0.3.0
+Flask-SQLAlchemy==2.5.1
+bcrypt==3.1.7

@@ -1,4 +1,11 @@
-# SSB-CTF
+# SSB-CTF (一个极简的CTF平台)
+## 开发进度
+- [x] 用户注册
+- [ ] 验证码
+- [ ] 用户登录
+- [ ] 获取用户信息
+- [ ] JWT续约
+
 ## 技术栈
 - [Flask](https://github.com/pallets/flask)
 - [Flask-restx](https://github.com/python-restx/flask-restx)
