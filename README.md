@@ -9,6 +9,7 @@
 ## 技术栈
 - [Flask](https://github.com/pallets/flask)
 - [Flask-restx](https://github.com/python-restx/flask-restx)
+- [Flask-SQLalchemy](https://github.com/pallets/flask-sqlalchemy)
 
 ## 目录结构
 - `api/` 用来存放api的路由和处理函数
