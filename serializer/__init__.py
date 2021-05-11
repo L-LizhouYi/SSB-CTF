@@ -8,6 +8,7 @@
 """
 
 USER_INPUT_ERROR = 40001
+JWT_TOKEN_ERROR = 40002
 
 
 import time

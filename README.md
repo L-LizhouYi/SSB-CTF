@@ -2,18 +2,20 @@
 ## 开发进度
 - [x] 用户注册
 - [ ] 验证码
-- [ ] 用户登录
-- [ ] 获取用户信息
-- [ ] JWT续约
+- [x] 用户登录
+- [x] 获取用户信息
+- [ ] 用户注销 (Redis)
+- [ ] 命令行注册管理员
 
 ## 技术栈
 - [Flask](https://github.com/pallets/flask)
 - [Flask-restx](https://github.com/python-restx/flask-restx)
 - [Flask-SQLalchemy](https://github.com/pallets/flask-sqlalchemy)
+- [Flask-JWT-Extended](https://github.com/vimalloc/flask-jwt-extended)
 
 ## 目录结构
 - `api/` 用来存放api的路由和处理函数
-- `middleware/` 用来存放自定义的中间件
+- `middleware/` 用来存放自定义的中间件 jwt之类
 - `server/` 服务器核心, 变量配置都在这里
 - `main.py` 服务器入口文件
 - `.env` 环境变量文件

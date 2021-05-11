@@ -10,6 +10,8 @@
 import os
 from flask import Flask
 from api import api
+from middleware.jwt import jwt
+from datetime import timedelta
 
 from model import db
 
@@ -22,11 +24,17 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("SQLALCHEMY_DATABASE_URI")   # 数据库连接配置
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
+    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=24)
+
     # 注册蓝图
     app.register_blueprint(api)
 
     # 数据库连接相关
     db.init_app(app)
+
+    # jwt相关
+    jwt.init_app(app)
 
     # 创建表
     with app.app_context():
