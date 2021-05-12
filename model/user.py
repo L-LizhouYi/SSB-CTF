@@ -6,12 +6,10 @@
 @ Time:  2021-05-08
 @ FileName: user.py
 """
-
 import bcrypt
-import time
-from model import db
-import datetime
 from sqlalchemy.sql import func
+
+from model import db
 
 
 class User(db.Model):
@@ -24,6 +22,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), unique=False, nullable=False)
+    email = db.Column(db.String(100), unique=True, nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     register_timed = db.Column(db.TIMESTAMP, default=func.now())
 
@@ -33,9 +32,10 @@ class User(db.Model):
         return bcrypt.hashpw(password.encode("utf-8"), salt)
 
     # 创建用户
-    def create(self, username, password, is_admin: bool):
+    def create(self, username, password, email, is_admin: bool):
         self.username = username
         self.password = self.setPassword(password)
+        self.email = email
         self.is_admin = is_admin
         return self
 

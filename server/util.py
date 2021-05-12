@@ -11,6 +11,7 @@ from model import db
 import getpass
 
 def createSuperUser():
+    email = input("email:")
     username = input("username (default: root):")
 
     if username == "":
@@ -18,7 +19,7 @@ def createSuperUser():
 
     password = getpass.getpass("password (required):")
 
-    user = User().create(username, password, True)
+    user = User().create(username, password, email=email, is_admin=True)
     db.session.add(user)
     db.session.commit()
 
