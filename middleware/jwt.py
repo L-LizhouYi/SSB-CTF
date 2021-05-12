@@ -7,9 +7,8 @@
 @ FileName: jwt.py
 """
 import flask_jwt_extended.exceptions
-from flask_jwt_extended import JWTManager, get_jwt_identity
+from flask_jwt_extended import JWTManager, get_jwt_identity, verify_jwt_in_request, get_jwt
 from functools import wraps
-from flask_jwt_extended import verify_jwt_in_request
 import serializer
 
 jwt = JWTManager()
@@ -32,10 +31,11 @@ def login_required():
         @wraps(fn)
         def decorator(*args, **kwargs):
             verify_jwt_in_request(optional=True)
+            if get_jwt() == {}:
+                return serializer.Response(serializer.JWT_FORMAT_ERROR, None, "JWT TOKEN未填写").Return()
+
             return fn(*args, **kwargs)
-
         return decorator
-
     return wrapper
 
 # admin_required 需要是管理员
@@ -44,6 +44,9 @@ def admin_required():
         @wraps(fn)
         def decorator(*args, **kwargs):
             verify_jwt_in_request(optional=True)
+            if get_jwt() == {}:
+                return serializer.Response(serializer.JWT_FORMAT_ERROR, None, "JWT TOKEN未填写").Return()
+
             claims = get_jwt_identity()
             if claims["is_admin"]:
                 return fn(*args, **kwargs)
