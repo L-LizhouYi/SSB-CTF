@@ -26,14 +26,14 @@ from middleware.jwt import login_required, admin_required
 user_namespace = Namespace("user", description="用户路由")
 
 # 用于swagger文档显示
-userRegisterDataSwagger = user_namespace.model('userData', {
+userRegisterDataSwagger = user_namespace.model('userRegisterData', {
     "username": fields.String(description="用户名", required=True),
     "password": fields.String(description="密码", required=True),
     "email": fields.String(description="邮箱", required=True)
 })
 
 # 用于swagger文档显示
-userLoginDataSwagger = user_namespace.model('userData', {
+userLoginDataSwagger = user_namespace.model('userLoginData', {
     "username": fields.String(description="用户名", required=True),
     "password": fields.String(description="密码", required=True)
 })
