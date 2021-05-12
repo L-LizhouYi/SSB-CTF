@@ -7,21 +7,16 @@
 @ FileName: user.py
 """
 
-# base
 import sqlalchemy.exc
-from flask_restx import Namespace, Resource, reqparse, fields
-from flask import jsonify
-
-# serializer
-import serializer
-from model import db
-from model.user import User as UserModel
 from flask_jwt_extended import create_access_token
 from flask_jwt_extended import get_jwt, get_jwt_identity
-from flask_jwt_extended import jwt_required
+from flask_restx import Namespace, Resource, reqparse, fields
 
-from middleware.jwt import login_required, admin_required
-
+import serializer
+from middleware.jwt import login_required
+from model import db
+from model.user import User as UserModel
+from cache import redisClient
 
 user_namespace = Namespace("user", description="用户路由")
 
@@ -37,6 +32,7 @@ userLoginDataSwagger = user_namespace.model('userLoginData', {
     "username": fields.String(description="用户名", required=True),
     "password": fields.String(description="密码", required=True)
 })
+
 
 # UserRegister 用户注册
 @user_namespace.route("/register")
@@ -60,7 +56,7 @@ class UserRegister(Resource):
             return serializer.Response(serializer.USER_INPUT_ERROR, None, "输入参数不合法").Return()
 
         try:
-            user = UserModel().create(username=username, password=password,email=email, is_admin=False)
+            user = UserModel().create(username=username, password=password, email=email, is_admin=False)
             db.session.add(user)
             db.session.commit()
         except sqlalchemy.exc.IntegrityError as e:
@@ -83,7 +79,6 @@ class UserLogin(Resource):
         parser.add_argument('password', type=str, help='Password', location="json")
         args = parser.parse_args()
 
-
         username = args.get("username", None)
         password = args.get("password", None)
         if (username is None) or (password is None):
@@ -93,7 +88,6 @@ class UserLogin(Resource):
         if not user or not user.checkPassword(password):
             return serializer.Response(serializer.USER_INPUT_ERROR, None, "用户名或密码输入不正确").Return()
 
-
         token = create_access_token(identity={
             "id": user.id,
             "username": user.username,
@@ -102,7 +96,6 @@ class UserLogin(Resource):
             "register_time": user.register_timed
         })
 
-
         # 返回data
         data = {
             "access_token": token,
@@ -110,6 +103,7 @@ class UserLogin(Resource):
         }
 
         return serializer.Response(0, data, "登录成功!").Return()
+
 
 # UserMe 获取用户信息
 @user_namespace.route("/me")
@@ -122,3 +116,18 @@ class UserMe(Resource):
         """
         data = get_jwt_identity()
         return serializer.Response(0, data, "").Return()
+
+
+@user_namespace.route("/logout")
+class UserLogout(Resource):
+    @login_required()
+    def get(self):
+        """
+        注销用户
+        serializer.Response
+        """
+        jwt_uuid = get_jwt()["jti"]
+
+        redisClient.sadd("jwt:black", jwt_uuid)
+
+        return serializer.Response(0, None, "注销成功!").Return()

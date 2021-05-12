@@ -9,6 +9,7 @@
 import flask_jwt_extended.exceptions
 from flask_jwt_extended import JWTManager, get_jwt_identity, verify_jwt_in_request, get_jwt
 from functools import wraps
+from cache import redisClient
 import serializer
 
 jwt = JWTManager()
@@ -34,6 +35,9 @@ def login_required():
             if get_jwt() == {}:
                 return serializer.Response(serializer.JWT_FORMAT_ERROR, None, "JWT TOKEN未填写").Return()
 
+            if (checkJWTisLogout(get_jwt()["jti"])):
+                return serializer.Response(serializer.JWT_EXPIRED_ERROR, None, "token已失效").Return()
+
             return fn(*args, **kwargs)
         return decorator
     return wrapper
@@ -47,6 +51,9 @@ def admin_required():
             if get_jwt() == {}:
                 return serializer.Response(serializer.JWT_FORMAT_ERROR, None, "JWT TOKEN未填写").Return()
 
+            if (checkJWTisLogout(get_jwt()["jti"])):
+                return serializer.Response(serializer.JWT_EXPIRED_ERROR, None, "token已失效").Return()
+
             claims = get_jwt_identity()
             if claims["is_admin"]:
                 return fn(*args, **kwargs)
@@ -54,3 +61,7 @@ def admin_required():
                 return serializer.Response(serializer.JWT_TOKEN_ERROR, None, "您不是管理员").Return()
         return decorator
     return wrapper
+
+# checkJWTisLogout 检查jwt是否已经被注销过了
+def checkJWTisLogout(jwt_uuid):
+    return redisClient.sismember("jwt:black", jwt_uuid)

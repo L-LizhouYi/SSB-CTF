@@ -14,6 +14,7 @@ from middleware.jwt import jwt
 from datetime import timedelta
 
 from model import db
+from cache import redisInit
 
 # create_app 实例化Flask实例
 def create_app():
@@ -35,6 +36,10 @@ def create_app():
 
     # jwt相关
     jwt.init_app(app)
+
+    # redis相关
+    if not redisInit():
+        raise Exception("Redis连接失败")
 
     # 创建表
     with app.app_context():

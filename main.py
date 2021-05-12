@@ -7,12 +7,13 @@
 @ FileName: main.py
 """
 from dotenv import load_dotenv
+load_dotenv()
+
 import sys
 import server
 from server.util import createSuperUser
 
 # 加载环境变量
-load_dotenv()
 
 app = server.create_app()
 
