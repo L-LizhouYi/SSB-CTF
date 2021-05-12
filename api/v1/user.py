@@ -69,7 +69,7 @@ class UserRegister(Resource):
         return serializer.Response(0, None, "用户创建成功!").Return()
 
 
-# 用户登录
+# UserLogin 用户登录
 @user_namespace.route("/login")
 class UserLogin(Resource):
     @user_namespace.doc(body=userLoginDataSwagger)
@@ -97,6 +97,7 @@ class UserLogin(Resource):
         token = create_access_token(identity={
             "id": user.id,
             "username": user.username,
+            "email": user.email,
             "is_admin": user.is_admin,
             "register_time": user.register_timed
         })
@@ -110,6 +111,7 @@ class UserLogin(Resource):
 
         return serializer.Response(0, data, "登录成功!").Return()
 
+# UserMe 获取用户信息
 @user_namespace.route("/me")
 class UserMe(Resource):
     @login_required()
