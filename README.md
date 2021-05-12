@@ -5,7 +5,7 @@
 - [x] 用户登录
 - [x] 获取用户信息
 - [ ] 用户注销 (Redis)
-- [ ] 命令行注册管理员
+- [x] 命令行注册管理员
 
 ## 技术栈
 - [Flask](https://github.com/pallets/flask)
