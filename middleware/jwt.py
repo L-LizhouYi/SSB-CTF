@@ -31,10 +31,7 @@ def login_required():
     def wrapper(fn):
         @wraps(fn)
         def decorator(*args, **kwargs):
-            try:
-                verify_jwt_in_request()
-            except flask_jwt_extended.exceptions.NoAuthorizationError:
-                return serializer.Response(serializer.JWT_FORMAT_ERROR, None, "JWT格式不正确或者未传入JWT").Return()
+            verify_jwt_in_request(optional=True)
             return fn(*args, **kwargs)
 
         return decorator
@@ -46,10 +43,7 @@ def admin_required():
     def wrapper(fn):
         @wraps(fn)
         def decorator(*args, **kwargs):
-            try:
-                verify_jwt_in_request()
-            except flask_jwt_extended.exceptions.NoAuthorizationError:
-                return serializer.Response(serializer.JWT_FORMAT_ERROR, None, "JWT格式不正确或者未传入JWT").Return()
+            verify_jwt_in_request(optional=True)
             claims = get_jwt_identity()
             if claims["is_admin"]:
                 return fn(*args, **kwargs)
