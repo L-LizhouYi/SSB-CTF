@@ -46,6 +46,7 @@ class UserRegister(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str, help='Username', location="json")
         parser.add_argument('password', type=str, help='Password', location="json")
+        parser.add_argument('email', type=str, help='Email', location="json")
         args = parser.parse_args()
 
         username = args.get("username", None)
