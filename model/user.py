@@ -8,8 +8,10 @@
 """
 
 import bcrypt
-
+import time
 from model import db
+import datetime
+from sqlalchemy.sql import func
 
 
 class User(db.Model):
@@ -22,8 +24,8 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
     password = db.Column(db.String(255), unique=False, nullable=False)
-    # is_admin = db.Column(db.Boolean, default=False)
-    # register_timed = db.Column(db.TIMESTAMP)
+    is_admin = db.Column(db.Boolean, default=False)
+    register_timed = db.Column(db.TIMESTAMP, default=func.now())
 
     # setPassword 设置密码 传入明文需要加密成慢哈希
     def setPassword(self, password):
@@ -31,9 +33,10 @@ class User(db.Model):
         return bcrypt.hashpw(password.encode("utf-8"), salt)
 
     # 创建用户
-    def create(self, username, password):
+    def create(self, username, password, is_admin: bool):
         self.username = username
         self.password = self.setPassword(password)
+        self.is_admin = is_admin
         return self
 
     # checkPassword 验证密码是否输入正确

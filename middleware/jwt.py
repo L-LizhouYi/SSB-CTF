@@ -6,7 +6,7 @@
 @ Time:  2021-05-11
 @ FileName: jwt.py
 """
-from flask_jwt_extended import JWTManager, get_jwt
+from flask_jwt_extended import JWTManager, get_jwt_identity
 from functools import wraps
 from flask_jwt_extended import verify_jwt_in_request
 import serializer
@@ -43,7 +43,7 @@ def admin_required():
         @wraps(fn)
         def decorator(*args, **kwargs):
             verify_jwt_in_request()
-            claims = get_jwt()
+            claims = get_jwt_identity()
             if claims["is_admin"]:
                 return fn(*args, **kwargs)
             else:

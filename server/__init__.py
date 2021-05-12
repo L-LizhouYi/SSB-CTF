@@ -41,4 +41,7 @@ def create_app():
         db.create_all()
         db.session.commit()
 
+    # 推送app上下文
+    app.app_context().push()
+
     return app

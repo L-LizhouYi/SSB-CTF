@@ -52,7 +52,7 @@ class UserRegister(Resource):
             return serializer.Response(serializer.USER_INPUT_ERROR, None, "用户名或密码输入不合法").Return()
 
         try:
-            user = UserModel().create(username, password)
+            user = UserModel().create(username, password, False)
             db.session.add(user)
             db.session.commit()
         except sqlalchemy.exc.IntegrityError as e:
@@ -88,7 +88,9 @@ class UserLogin(Resource):
 
         token = create_access_token(identity={
             "id": user.id,
-            "username": user.username
+            "username": user.username,
+            "is_admin": user.is_admin,
+            "register_time": user.register_timed
         })
 
 
