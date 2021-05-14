@@ -166,6 +166,7 @@ class VerifyRegistered(Resource):
         """
         验证用户是否存在
         可以传入username 或者 email
+        serializer.Response
         """
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str, help='Username', location="json")
