@@ -27,12 +27,6 @@ userRegisterDataSwagger = user_namespace.model('userRegisterData', {
     "email": fields.String(description="邮箱", required=True)
 })
 
-# 用于swagger文档显示
-userLoginDataSwagger = user_namespace.model('userLoginData', {
-    "username": fields.String(description="用户名", required=True),
-    "password": fields.String(description="密码", required=True)
-})
-
 
 # UserRegister 用户注册
 @user_namespace.route("/register")
@@ -53,18 +47,35 @@ class UserRegister(Resource):
         password = args.get("password", None)
         email = args.get("email", None)
 
-        if (username is None) or (password is None) or (email is None):
-            return serializer.Response(serializer.USER_INPUT_ERROR, None, "输入参数不合法").Return()
+        if ( (username is None) or (password is None) or (email is None) ) and ( 18 < len(username) < 4 ):
+            return serializer.Response(serializer.USER_INPUT_ERROR, None, "输入参数不合法 (可能是用户名长度不正确哦.)").Return()
 
+        # 检查用户名是否存在
+        temp = UserModel.query.filter_by(username=username).first()
+        if temp is not None:
+            return serializer.Response(serializer.USER_EXIST_ERROR, None, "用户名已存在").Return()
+
+        # 检查邮箱是否已经被注册
+        temp = UserModel.query.filter_by(email=email).first()
+        if temp is not None:
+            return serializer.Response(serializer.USER_EXIST_ERROR, None, "该邮箱已被使用").Return()
+
+        # 防止写入数据库出错.
         try:
             user = UserModel().create(username=username, password=password, email=email, is_admin=False)
             db.session.add(user)
             db.session.commit()
         except sqlalchemy.exc.IntegrityError as e:
-            return serializer.Response(serializer.USER_INPUT_ERROR, e.args, "用户创建失败!").Return()
+            return serializer.Response(serializer.SERVER_DATABASE_ERROR, e.args, "用户创建失败!").Return()
 
         return serializer.Response(0, None, "用户创建成功!").Return()
 
+
+# 用于swagger文档显示
+userLoginDataSwagger = user_namespace.model('userLoginData', {
+    "username": fields.String(description="用户名", required=True),
+    "password": fields.String(description="密码", required=True)
+})
 
 # UserLogin 用户登录
 @user_namespace.route("/login")
@@ -78,14 +89,21 @@ class UserLogin(Resource):
         parser = reqparse.RequestParser()
         parser.add_argument('username', type=str, help='Username', location="json")
         parser.add_argument('password', type=str, help='Password', location="json")
+        parser.add_argument('email', type=str, help='Email', location="json")
         args = parser.parse_args()
 
         username = args.get("username", None)
         password = args.get("password", None)
-        if (username is None) or (password is None):
-            return serializer.Response(serializer.USER_INPUT_ERROR, None, "用户名或密码输入不合法").Return()
+        email = args.get("email", None)
 
-        user = UserModel.query.filter_by(username=username).first()
+        if ((username is None) and (email is None)) or (password is None):
+            return serializer.Response(serializer.USER_INPUT_ERROR, None, "参数输入不合法").Return()
+
+        if email is not None:
+            user = UserModel.query.filter_by(email=email).first()
+        else:
+            user = UserModel.query.filter_by(username=username).first()
+
         if not user or not user.checkPassword(password):
             return serializer.Response(serializer.USER_INPUT_ERROR, None, "用户名或密码输入不正确").Return()
 
@@ -119,6 +137,7 @@ class UserMe(Resource):
         return serializer.Response(0, data, "").Return()
 
 
+# UserLogout 用户注销
 @user_namespace.route("/logout")
 class UserLogout(Resource):
     @login_required()
@@ -132,3 +151,38 @@ class UserLogout(Resource):
         redisClient.sadd("jwt:black", jwt_uuid)
 
         return serializer.Response(0, None, "注销成功!").Return()
+
+
+userVerifyDataSwagger = user_namespace.model("userVerifyData", {
+    "username": fields.String(description="用户名"),
+    "email": fields.String(description="邮箱")
+})
+
+# VerifyRegistered 查看用户是否被注册
+@user_namespace.route("/verify_registered")
+class VerifyRegistered(Resource):
+    @user_namespace.doc(body=userVerifyDataSwagger)
+    def post(self):
+        """
+        验证用户是否存在
+        可以传入username 或者 email
+        """
+        parser = reqparse.RequestParser()
+        parser.add_argument('username', type=str, help='Username', location="json")
+        parser.add_argument('email', type=str, help='Email', location="json")
+        args = parser.parse_args()
+
+        username = args.get("username", None)
+
+        if username is not None:
+            if UserModel.query.filter_by(username=username).first() is not None:
+                return serializer.Response(serializer.USER_EXIST_ERROR, None, "该用户名已存在").Return()
+
+        email = args.get("email", None)
+        if UserModel.query.filter_by(email=email).first() is not None:
+            return serializer.Response(serializer.USER_EXIST_ERROR, None, "该邮箱已存在").Return()
+
+        if email is None and username is None:
+            return serializer.Response(serializer.USER_INPUT_ERROR, None, "请输入内容啦~").Return()
+
+        return serializer.Response(0, None, "该用户名或邮箱未被注册").Return()
